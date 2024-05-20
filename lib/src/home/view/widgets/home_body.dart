@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
 import 'package:todo_app/src/home/view/widgets/home_appbar.dart';
+import 'package:todo_app/src/home/view/widgets/home_navigation_bar.dart';
 import 'package:todo_app/src/home/view/widgets/home_todos_items.dart';
 import 'package:todo_app/src/home/view/widgets/home_type_todos_button.dart';
 
@@ -21,23 +23,27 @@ class HomeBodyWidget extends StatelessWidget {
           ],
         ),
       ),
-      child: CustomScrollView(
+      child: const CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: SizedBox(height: 10),
           ),
-          const HomeAppBarWidget(),
-          const SliverToBoxAdapter(
+          HomeAppBarWidget(),
+          SliverToBoxAdapter(
             child: SizedBox(height: 30),
           ),
-          const HomeTypeTodosButtonWidget(),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 15),
-          ),
-          const HomeTodosItemsWidget(),
+          HomeTypeTodosButtonWidget(),
           SliverToBoxAdapter(
-            child: Container(),
-          )
+            child: SizedBox(height: 30),
+          ),
+          HomeNavigationBarWidget(),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 30),
+          ),
+          HomeTodosItemsWidget(),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 20),
+          ),
         ],
       ),
     );

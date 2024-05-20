@@ -10,7 +10,7 @@ class HomeTodosItemsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool loading = Provider.of<HomeProviderImp>(context).statusViews ==
+    final bool loading = Provider.of<HomeProviderImp>(context).getTodosStView ==
         StatusViews.succuss;
     return SliverList.separated(
       itemCount:

@@ -9,7 +9,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i5;
-import 'package:todo_app/src/home/view/widgets/home_view.dart' as _i1;
+import 'package:todo_app/src/home/view/home_view.dart' as _i1;
 import 'package:todo_app/src/login/view/login_view.dart' as _i2;
 import 'package:todo_app/src/onboarding/view/onboarding_view.dart' as _i3;
 import 'package:todo_app/src/splash/view/splash_view.dart' as _i4;

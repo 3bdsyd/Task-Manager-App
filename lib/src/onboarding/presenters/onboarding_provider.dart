@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:todo_app/core/gen/assets.gen.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
+import 'package:todo_app/core/helper/shared_preferences.dart';
 import 'package:todo_app/core/router/app_router.gr.dart';
 import 'package:todo_app/core/styles/text_styles.dart';
+import 'package:todo_app/core/utils/constants/app_key.dart';
 import 'package:todo_app/src/onboarding/model/onboarding_model.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
@@ -55,7 +57,10 @@ class OnBoardingProvider extends ChangeNotifier {
       );
 
       if (_currentPage > 1) {
+        await SharedPref.setString(AppKey.skipOnBoarding, 'true');
+
         _scaffoldMessengerState.currentContext!.router.push(const LoginView());
+
         break;
       }
 
@@ -66,8 +71,10 @@ class OnBoardingProvider extends ChangeNotifier {
   }
 
   /// Animates to the next page in onboarding.
-  void animateToPage() {
+  void animateToPage() async {
     if (_currentPage > 1) {
+      await SharedPref.setString(AppKey.skipOnBoarding, 'true');
+
       _scaffoldMessengerState.currentContext!.router.push(const LoginView());
 
       return;

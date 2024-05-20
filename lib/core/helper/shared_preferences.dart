@@ -13,7 +13,7 @@ class SharedPref {
   }
 
   static String? getString(String key) {
-    return _prefInstance!.getString(key);
+    return _prefInstance?.getString(key);
   }
 
   static Future<bool> setString(String key, String value) async {

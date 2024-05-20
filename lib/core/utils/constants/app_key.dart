@@ -1,3 +1,4 @@
 class AppKey {
-  static const userToken = 'userToken';
+  static const userId = 'userId';
+  static const skipOnBoarding = 'skipOnBoarding';
 }

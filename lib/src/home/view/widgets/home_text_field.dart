@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/core/gen/colors.gen.dart';
 import 'package:todo_app/core/styles/text_styles.dart';
 
 class HomeTextFieldWidget extends StatelessWidget {
@@ -10,6 +11,7 @@ class HomeTextFieldWidget extends StatelessWidget {
       child: TextFormField(
         style: TextStyles.style14.copyWith(color: Colors.white),
         maxLines: 5,
+        cursorColor: ColorName.black,
         decoration: const InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide.none,

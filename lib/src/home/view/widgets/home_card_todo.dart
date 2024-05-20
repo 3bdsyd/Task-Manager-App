@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo_app/src/home/presenters/home_provider.dart';
 import 'package:todo_app/src/home/view/widgets/home_card.dart';
 import 'package:todo_app/src/home/view/widgets/home_card_deleted_button.dart';
 import 'package:todo_app/src/home/view/widgets/home_card_edit_button.dart';
@@ -9,18 +11,21 @@ class HomeCardTodoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int idTodo = Provider.of<HomeProviderImp>(context).todoItems[index].id;
     return Stack(
       children: [
         HomeCardWidget(index: index),
-        const Positioned(
+         Positioned(
           bottom: 0,
           right: 3,
-          child: HomeCardEditButtonWidget(),
+          child: HomeCardEditButtonWidget(idTodo: idTodo),
         ),
-        const Positioned(
+         Positioned(
           bottom: 0,
           right: 35,
-          child: HomeCardDeletedButton(),
+          child: HomeCardDeletedButton(
+            idTodo: idTodo,
+          ),
         ),
       ],
     );

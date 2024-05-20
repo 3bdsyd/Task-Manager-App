@@ -13,7 +13,6 @@ class HomeCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Todo todo = Provider.of<HomeProviderImp>(context).todoItems[index];
-
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(

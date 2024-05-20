@@ -10,16 +10,12 @@ class TodosModel {
   final int total;
   final int skip;
   final int limit;
-  final bool? isDeleted;
-  final String? deletedOn;
 
   TodosModel({
     required this.todos,
     required this.total,
     required this.skip,
     required this.limit,
-    this.isDeleted,
-    this.deletedOn,
   });
 
   factory TodosModel.fromJson(Map<String, dynamic> json) => TodosModel(
@@ -27,8 +23,6 @@ class TodosModel {
         total: json["total"],
         skip: json["skip"],
         limit: json["limit"],
-        isDeleted: json['isDeleted'],
-        deletedOn: json['deletedOn'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -36,8 +30,6 @@ class TodosModel {
         "total": total,
         "skip": skip,
         "limit": limit,
-        'isDeleted': isDeleted,
-        'deletedOn': deletedOn,
       };
 }
 
@@ -50,16 +42,12 @@ class Todo {
   final String todo;
   final bool completed;
   final int userId;
-  final bool? isDeleted;
-  final String? deletedOn;
 
   Todo({
     required this.id,
     required this.todo,
     required this.completed,
     required this.userId,
-    this.isDeleted,
-    this.deletedOn,
   });
 
   factory Todo.fromJson(Map<String, dynamic> json) => Todo(
@@ -67,8 +55,6 @@ class Todo {
         todo: json["todo"],
         completed: json["completed"],
         userId: json["userId"],
-        isDeleted: json["isDeleted"],
-        deletedOn: json["deletedOn"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -76,7 +62,5 @@ class Todo {
         "todo": todo,
         "completed": completed,
         "userId": userId,
-        "isDeleted": isDeleted,
-        "deletedOn": deletedOn,
       };
 }
