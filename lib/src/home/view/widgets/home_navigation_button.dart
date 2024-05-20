@@ -13,13 +13,13 @@ class HomeNavigationButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: onTap,
-      onLongPress: () => {},
-      child: Card(
-        elevation: 0,
-        color: ColorName.purplePlum.withOpacity(.7),
+    return Card(
+      elevation: 0,
+      color: ColorName.purplePlum.withOpacity(.7),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        onLongPress: () => {},
         child: Align(
           alignment: Alignment.center,
           child: Padding(

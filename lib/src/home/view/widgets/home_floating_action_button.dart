@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_app/core/gen/assets.gen.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
 import 'package:todo_app/core/styles/text_styles.dart';
+import 'package:todo_app/src/home/view/widgets/home_check_todo_widget.dart';
 import 'package:todo_app/src/home/view/widgets/home_text_field.dart';
 import 'package:todo_app/src/home/view/widgets/home_todo_button_add.dart';
 
@@ -20,7 +21,8 @@ class HomeFloatingActionButtonWidget extends StatelessWidget {
       childrenAlignment: Alignment.centerLeft,
       childrenBacgroundColor: ColorName.purplePlum.withOpacity(.8),
       childrenCount: 1,
-      distance: 100,
+      distance: 50,
+      closeChildrenRotate: true,
       children: [
         SizedBox(
           height: 200,
@@ -30,10 +32,14 @@ class HomeFloatingActionButtonWidget extends StatelessWidget {
             children: [
               Text(
                 'New TODO',
-                style: TextStyles.style12.copyWith(color: Colors.white),
+                style: TextStyles.style12.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const HomeTextFieldWidget(),
-              const HomeTodoButtonAddWidget(),
+              const HomeCheckTodoWidget(),
+              const HomeTodoButtonAddWidget()
             ],
           ),
         ),

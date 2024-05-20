@@ -1,26 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
+import 'package:todo_app/core/helper/status_view.dart';
 import 'package:todo_app/core/styles/text_styles.dart';
+import 'package:todo_app/src/home/presenters/home_provider.dart';
 
 class HomeTodoButtonAddWidget extends StatelessWidget {
   const HomeTodoButtonAddWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: ColorName.lightGrey,
-        borderRadius: BorderRadius.circular(8),
+    final HomeProviderImp provider = Provider.of<HomeProviderImp>(context);
+    final bool isLoading = provider.addTodoStView == StatusViews.loading;
+    return InkWell(
+      onTap: () => provider.addNewTodo(),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: ColorName.lightGrey,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        height: 30,
+        child: child(isLoading),
       ),
-      height: 30,
-      child: Text(
+    );
+  }
+
+  Widget child(bool isLoading) {
+    if (isLoading) {
+      return const Align(
+        child: SizedBox(
+          height: 15,
+          width: 15,
+          child: CircularProgressIndicator(
+            color: ColorName.purplePlum,
+            backgroundColor: ColorName.babyBlue,
+          ),
+        ),
+      );
+    } else {
+      return Text(
         'Add',
         style: TextStyles.style12.copyWith(
           color: ColorName.black,
           fontWeight: FontWeight.w700,
         ),
-      ),
-    );
+      );
+    }
   }
 }

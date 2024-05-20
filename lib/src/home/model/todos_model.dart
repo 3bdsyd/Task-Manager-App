@@ -41,7 +41,7 @@ class Todo {
   final int id;
   final String todo;
   final bool completed;
-  final int userId;
+  final dynamic userId;
 
   Todo({
     required this.id,

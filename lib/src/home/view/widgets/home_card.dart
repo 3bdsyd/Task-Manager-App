@@ -44,7 +44,6 @@ class HomeCardWidget extends StatelessWidget {
             const SizedBox(height: 5),
             Text(
               todo.todo,
-              maxLines: 4,
               style: TextStyles.style14,
             ),
             const SizedBox(height: 5),

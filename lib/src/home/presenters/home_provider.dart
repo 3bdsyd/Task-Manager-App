@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:todo_app/core/helper/failures_handling.dart';
 import 'package:todo_app/core/helper/shared_preferences.dart';
 import 'package:todo_app/core/helper/status_view.dart';
@@ -12,12 +10,16 @@ import 'package:todo_app/src/home/repository/home_repo.dart';
 abstract class HomeProvider extends ChangeNotifier {
   Future getTodos();
   Future deleteTodos(int idTodo);
+  Future editTodos(int idTodo, String todo, bool completed);
+  Future addNewTodo();
 }
 
 class HomeProviderImp extends HomeProvider {
   StatusViews getTodosStView = StatusViews.initial;
 
   StatusViews editTodoStView = StatusViews.initial;
+  StatusViews deleteTodoStView = StatusViews.initial;
+  StatusViews addTodoStView = StatusViews.initial;
 
   GlobalKey<ScaffoldMessengerState> scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -56,6 +58,16 @@ class HomeProviderImp extends HomeProvider {
     getTodos();
   }
 
+  void toggledCheckAddTodo() {
+    addTodoIsCompleted = !addTodoIsCompleted;
+    notifyListeners();
+  }
+
+  void toggledCheckEditTodo() {
+    editTodoIsCompleted = !editTodoIsCompleted;
+    notifyListeners();
+  }
+
   void selectTypeTodos(int activeIndex) {
     this.activeIndex = activeIndex;
     if (activeIndex == 0) {
@@ -72,10 +84,92 @@ class HomeProviderImp extends HomeProvider {
     notifyListeners();
   }
 
+  final TextEditingController addTodoController = TextEditingController();
+  bool addTodoIsCompleted = false;
+
+  @override
+  Future<void> addNewTodo() async {
+    if (addTodoController.text.isEmpty) return;
+
+    // Set status to loading
+    addTodoStView = StatusViews.loading;
+    notifyListeners();
+    final currentState = scaffoldKey.currentState;
+
+    final result = await _homeRepoImp.postTodo(
+      addTodoController.text.trim(),
+      addTodoIsCompleted,
+      userId!,
+    );
+
+    if (result is Failures) {
+      currentState!.showSnackBar(
+        SnackBar(
+          content: Text(result.errMessage),
+        ),
+      );
+    } else if (result is Todo) {
+      addTodoStView = StatusViews.succuss;
+      addTodoController.clear();
+      addTodoIsCompleted = false;
+      getTodos();
+    }
+
+    addTodoStView = StatusViews.initial;
+    notifyListeners();
+    try {} catch (error) {
+      if (currentState == null) return;
+      currentState.showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred'),
+        ),
+      );
+    }
+  }
+
+  final TextEditingController editTodoController = TextEditingController();
+  bool editTodoIsCompleted = false;
+
+  @override
+  Future<void> editTodos(int idTodo, String todo, bool completed) async {
+    // Set status to loading
+    editTodoStView = StatusViews.loading;
+    notifyListeners();
+    final currentState = scaffoldKey.currentState;
+    try {
+      final result = await _homeRepoImp.putTodo(
+        idTodo,
+        editTodoController.text.trim(),
+        editTodoIsCompleted,
+      );
+
+      if (result is Failures) {
+        currentState!.showSnackBar(
+          SnackBar(
+            content: Text(result.errMessage),
+          ),
+        );
+      } else if (result is TodoDeletedModel) {
+        // If get todos is successful, update the todos model
+        editTodoStView = StatusViews.succuss;
+        getTodos();
+
+        notifyListeners();
+      }
+    } catch (error) {
+      if (currentState == null) return;
+      currentState.showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred'),
+        ),
+      );
+    }
+  }
+
   @override
   Future<void> deleteTodos(int idTodo) async {
     // Set status to loading
-    editTodoStView = StatusViews.loading;
+    deleteTodoStView = StatusViews.loading;
     notifyListeners();
 
     final currentState = scaffoldKey.currentState;
@@ -91,18 +185,8 @@ class HomeProviderImp extends HomeProvider {
       } else if (result is TodoDeletedModel) {
         // If get todos is successful, update the todos model
         todoDeletedModel = result;
-
-        editTodoStView = StatusViews.succuss;
-        QuickAlert.show(
-          context: scaffoldKey.currentContext!,
-          type: QuickAlertType.success,
-          barrierDismissible: true,
-          confirmBtnText: 'Save',
-          
-        );
-
-        selectTypeTodos(0);
-
+        deleteTodoStView = StatusViews.succuss;
+        getTodos();
         notifyListeners();
       }
     } catch (error) {
@@ -136,7 +220,7 @@ class HomeProviderImp extends HomeProvider {
 
         getTodosStView = StatusViews.succuss;
 
-        selectTypeTodos(0);
+        selectTypeTodos(activeIndex);
 
         notifyListeners();
       }

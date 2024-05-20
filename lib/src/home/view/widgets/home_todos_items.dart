@@ -12,9 +12,10 @@ class HomeTodosItemsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool loading = Provider.of<HomeProviderImp>(context).getTodosStView ==
         StatusViews.succuss;
+    final int itemCount =
+        Provider.of<HomeProviderImp>(context).todoItems.length;
     return SliverList.separated(
-      itemCount:
-          loading ? Provider.of<HomeProviderImp>(context).todoItems.length : 3,
+      itemCount: loading ? itemCount : 3,
       itemBuilder: (context, index) => loading
           ? HomeCardTodoWidget(index: index)
           : const CustomShimmerWidget(

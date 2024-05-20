@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/core/gen/assets.gen.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
+import 'package:todo_app/core/helper/status_view.dart';
 import 'package:todo_app/src/home/presenters/home_provider.dart';
 
 class HomeCardDeletedButton extends StatelessWidget {
@@ -11,7 +12,8 @@ class HomeCardDeletedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Provider.of<HomeProviderImp>(context).deleteTodos(idTodo),
+      onTap: () => Provider.of<HomeProviderImp>(context, listen: false)
+          .deleteTodos(idTodo),
       child: Container(
         width: 25,
         height: 25,

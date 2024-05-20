@@ -25,7 +25,10 @@ class HomeCardEditButtonWidget extends StatelessWidget {
           fit: BoxFit.scaleDown,
           width: 10,
           height: 10,
-          colorFilter: const ColorFilter.mode(ColorName.white, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(
+            ColorName.white,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );

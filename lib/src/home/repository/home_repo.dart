@@ -7,7 +7,7 @@ import 'package:todo_app/src/home/model/todos_model.dart';
 abstract class HomeRepo {
   Future getTodos(String idUser, int limit, int skip);
   Future postTodo(String todo, bool completed, String userId);
-  Future putTodo(int idTodo);
+  Future putTodo(int idTodo, String todo, bool completed);
   Future deleteTodo(int idTodo);
 }
 
@@ -36,7 +36,7 @@ class HomeRepoImp extends HomeRepo {
       });
       return result.fold(
         (failure) => failure,
-        (login) => TodosModel.fromJson(login),
+        (todo) => Todo.fromJson(todo),
       );
     } catch (_) {
       return Failures(errMessage: 'An error occurred, try again');
@@ -44,7 +44,7 @@ class HomeRepoImp extends HomeRepo {
   }
 
   @override
-  Future putTodo(int idTodo) async {
+  Future putTodo(int idTodo, String todo, bool completed) async {
     try {
       final result = await Crud().put(url: '${AppApi.editTodo}$idTodo');
       return result.fold(
