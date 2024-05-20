@@ -1,0 +1,82 @@
+import 'dart:convert';
+
+TodosModel todosModelFromJson(String str) =>
+    TodosModel.fromJson(json.decode(str));
+
+String todosModelToJson(TodosModel data) => json.encode(data.toJson());
+
+class TodosModel {
+  final List<Todo> todos;
+  final int total;
+  final int skip;
+  final int limit;
+  final bool? isDeleted;
+  final String? deletedOn;
+
+  TodosModel({
+    required this.todos,
+    required this.total,
+    required this.skip,
+    required this.limit,
+    this.isDeleted,
+    this.deletedOn,
+  });
+
+  factory TodosModel.fromJson(Map<String, dynamic> json) => TodosModel(
+        todos: List<Todo>.from(json["todos"].map((x) => Todo.fromJson(x))),
+        total: json["total"],
+        skip: json["skip"],
+        limit: json["limit"],
+        isDeleted: json['isDeleted'],
+        deletedOn: json['deletedOn'],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "todos": List<dynamic>.from(todos.map((x) => x.toJson())),
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        'isDeleted': isDeleted,
+        'deletedOn': deletedOn,
+      };
+}
+
+Todo todoFromJson(String str) => Todo.fromJson(json.decode(str));
+
+String todoToJson(Todo data) => json.encode(data.toJson());
+
+class Todo {
+  final int id;
+  final String todo;
+  final bool completed;
+  final int userId;
+  final bool? isDeleted;
+  final String? deletedOn;
+
+  Todo({
+    required this.id,
+    required this.todo,
+    required this.completed,
+    required this.userId,
+    this.isDeleted,
+    this.deletedOn,
+  });
+
+  factory Todo.fromJson(Map<String, dynamic> json) => Todo(
+        id: json["id"],
+        todo: json["todo"],
+        completed: json["completed"],
+        userId: json["userId"],
+        isDeleted: json["isDeleted"],
+        deletedOn: json["deletedOn"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "todo": todo,
+        "completed": completed,
+        "userId": userId,
+        "isDeleted": isDeleted,
+        "deletedOn": deletedOn,
+      };
+}

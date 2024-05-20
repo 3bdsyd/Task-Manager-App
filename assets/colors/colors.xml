@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    /* Colors */
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="purple_plum">#585CE5</color>
+    <color name="turquoise">#58C6CD</color>
+    <color name="violet">#A1A3F6</color>
+    <color name="water">#99D7DB</color>
+    <color name="peach">#EEC1C1</color>
+    <color name="baby_blue">#A6D0EE</color>
+    <color name="sunny_yellow">#F2D382</color>
+    <color name="alert">#F59C9C</color>
+
+    /* Backgounds */
+    <color name="lilac_petals">#FAFAFF</color>
+    <color name="lilac_petals_dark">#F0F1F9</color>
+    <color name="violet_light">#D0D1FF</color>
+    <color name="water_light">#C9EBED</color>
+    <color name="peach_light">#F5DEDE</color>
+    <color name="sunny_yellow_light">#FBECC4</color>
+    <color name="baby_blue_light">#CFEBFF</color>
+
+    /* Basics */
+    <color name="white">#FFFFFF</color>
+    <color name="deep_blue">#0F2851</color>
+    <color name="light_grey">#E5E6EE</color>
+    <color name="cold_grey">#415371</color>
+    <color name="dark_grey">#898D9E</color>
+    <color name="dust_grey">#B0B2C3</color>
+</resources>
