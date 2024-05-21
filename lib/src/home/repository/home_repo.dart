@@ -1,8 +1,6 @@
 import 'package:todo_app/core/helper/failures_handling.dart';
-import 'package:todo_app/core/helper/shared_preferences.dart';
 import 'package:todo_app/core/network/crud.dart';
 import 'package:todo_app/core/utils/constants/app_api.dart';
-import 'package:todo_app/core/utils/constants/app_key.dart';
 import 'package:todo_app/src/home/model/todo_deleted_model.dart';
 import 'package:todo_app/src/home/model/todos_model.dart';
 
@@ -48,7 +46,10 @@ class HomeRepoImp extends HomeRepo {
   @override
   Future putTodo(int idTodo, String todo, bool completed) async {
     try {
-      final result = await Crud().put(url: '${AppApi.editTodo}$idTodo');
+      final result = await Crud().put(url: '${AppApi.editTodo}$idTodo', body: {
+        'todo': todo,
+        'completed': completed,
+      });
       return result.fold(
         (failure) => failure,
         (todo) => Todo.fromJson(todo),
@@ -58,7 +59,6 @@ class HomeRepoImp extends HomeRepo {
     }
   }
 
- 
   @override
   Future deleteTodo(int idTodo) async {
     try {

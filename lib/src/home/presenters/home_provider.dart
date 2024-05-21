@@ -221,7 +221,7 @@ class HomeProviderImp extends HomeProvider {
   //* Go to the next page
   void nextPage() async {
     if (todosModel == null) {
-      await getTodos();
+      // await getTodos();
       return;
     }
     if (skip + limit < todosModel!.total) {

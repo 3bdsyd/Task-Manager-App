@@ -1,23 +1,19 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:todo_app/core/helper/failures_handling.dart';
 
 class Crud {
   final Dio _dio = Dio();
-  // final String? token = SharedPref.getString(AppKey.userToken);
   Future<Either<Failures, Map<String, dynamic>>> get({
     required final String url,
   }) async {
     try {
       _dio.options.headers['content-Type'] = 'application/json';
-      // _dio.options.headers["x-access-token"] = "$token";
       final Response response = await _dio.get(url);
       final Map<String, dynamic> responseData = jsonDecode(
         response.toString(),
       );
-      debugPrint('responseData: ${responseData}');
 
       return right(responseData);
     } catch (e) {
@@ -42,11 +38,11 @@ class Crud {
       final response = await _dio.post(url, data: body);
 
       final Map<String, dynamic> responseData = jsonDecode(response.toString());
-      debugPrint('responseData: ${response.data}');
+
       return right(responseData);
     } catch (e) {
       if (e is DioException) {
-        if (e.response!.statusCode == 400) {
+        if (e.response?.statusCode == 400) {
           Map response = jsonDecode(e.response.toString());
           return left(Failures(errMessage: response['message']));
         }
@@ -58,20 +54,20 @@ class Crud {
 
    Future<Either<Failures, Map<String, dynamic>>> put({
     required final String url,
+    required final Map<String, dynamic> body,
+
   }) async {
     try {
       _dio.options.headers['content-Type'] = 'application/json';
-      // _dio.options.headers["x-access-token"] = "$token";
-      final Response response = await _dio.put(url);
-      final Map<String, dynamic> responseData = jsonDecode(
-        response.toString(),
-      );
-      debugPrint('responseData: ${responseData}');
+
+      final response = await _dio.put(url, data: body);
+
+      final Map<String, dynamic> responseData = jsonDecode(response.toString());
 
       return right(responseData);
     } catch (e) {
       if (e is DioException) {
-        if (e.response!.statusCode == 400) {
+        if (e.response?.statusCode == 400) {
           Map response = jsonDecode(e.response.toString());
           return left(Failures(errMessage: response['message']));
         }
@@ -80,24 +76,21 @@ class Crud {
       return left(Failures(errMessage: 'A sudden error occurred, try again'));
     }
   }
-
 
   Future<Either<Failures, Map<String, dynamic>>> delete({
     required final String url,
   }) async {
     try {
       _dio.options.headers['content-Type'] = 'application/json';
-      // _dio.options.headers["x-access-token"] = "$token";
       final Response response = await _dio.delete(url);
       final Map<String, dynamic> responseData = jsonDecode(
         response.toString(),
       );
-      debugPrint('responseData: ${responseData}');
 
       return right(responseData);
     } catch (e) {
       if (e is DioException) {
-        if (e.response!.statusCode == 400) {
+        if (e.response?.statusCode == 400) {
           Map response = jsonDecode(e.response.toString());
           return left(Failures(errMessage: response['message']));
         }
@@ -106,5 +99,4 @@ class Crud {
       return left(Failures(errMessage: 'A sudden error occurred, try again'));
     }
   }
-
 }

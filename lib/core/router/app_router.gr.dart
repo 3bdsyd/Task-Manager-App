@@ -22,7 +22,7 @@ abstract class $AppRouter extends _i5.RootStackRouter {
     HomeView.name: (routeData) {
       return _i5.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i1.HomeView(),
+        child: _i5.WrappedRoute(child: const _i1.HomeView()),
       );
     },
     LoginView.name: (routeData) {
