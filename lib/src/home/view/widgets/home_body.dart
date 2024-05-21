@@ -1,6 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
+import 'package:todo_app/src/home/presenters/home_provider.dart';
 import 'package:todo_app/src/home/view/widgets/home_appbar.dart';
 import 'package:todo_app/src/home/view/widgets/home_navigation_bar.dart';
 import 'package:todo_app/src/home/view/widgets/home_todos_items.dart';
@@ -23,28 +27,36 @@ class HomeBodyWidget extends StatelessWidget {
           ],
         ),
       ),
-      child: const CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: SizedBox(height: 10),
-          ),
-          HomeAppBarWidget(),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 30),
-          ),
-          HomeTypeTodosButtonWidget(),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 30),
-          ),
-          HomeNavigationBarWidget(),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 30),
-          ),
-          HomeTodosItemsWidget(),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 20),
-          ),
-        ],
+      child: SmartRefresher(
+        enablePullDown: true,
+        header: const WaterDropHeader(),
+        onRefresh: () async {
+          await Provider.of<HomeProviderImp>(context, listen: false).getTodos();
+        },
+        controller: Provider.of<HomeProviderImp>(context).refreshController,
+        child: const CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(height: 10),
+            ),
+            HomeAppBarWidget(),
+            SliverToBoxAdapter(
+              child: SizedBox(height: 30),
+            ),
+            HomeTypeTodosButtonWidget(),
+            SliverToBoxAdapter(
+              child: SizedBox(height: 30),
+            ),
+            HomeNavigationBarWidget(),
+            SliverToBoxAdapter(
+              child: SizedBox(height: 30),
+            ),
+            HomeTodosItemsWidget(),
+            SliverToBoxAdapter(
+              child: SizedBox(height: 20),
+            ),
+          ],
+        ),
       ),
     );
   }

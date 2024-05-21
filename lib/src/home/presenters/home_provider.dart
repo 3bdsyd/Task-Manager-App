@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
+import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 import 'package:todo_app/core/helper/database.dart';
 import 'package:todo_app/core/helper/failures_handling.dart';
 import 'package:todo_app/core/helper/shared_preferences.dart';
@@ -30,10 +32,14 @@ abstract class HomeProvider extends ChangeNotifier {
 
   //* Edit a task in the server
   Future editTodo(int idTodo);
+
+  //* logOut from current user
+  Future logOut();
 }
 
 class HomeProviderImp extends HomeProvider {
   //! ----------------- Variables -----------------
+  RefreshController refreshController = RefreshController();
 
   final GlobalKey<ScaffoldMessengerState> scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -88,12 +94,17 @@ class HomeProviderImp extends HomeProvider {
           await _database.insertTask(todo);
         }
       }
+      refreshController.refreshCompleted();
       getTodosStView = StatusViews.succuss;
     } else if (result is Failures) {
       if (_todoLocalItems.isNotEmpty) {
-        getTodosStView = StatusViews.succuss;
+        getTodosStView = StatusViews.initial;
       }
 
+      currentPage = 1;
+      skip = 0;
+
+      refreshController.refreshFailed();
       scaffoldKey.currentState
           ?.showSnackBar(SnackBar(content: Text(result.errMessage)));
     }
@@ -104,9 +115,11 @@ class HomeProviderImp extends HomeProvider {
   //* Fetch todos from both local and server
   @override
   Future<void> getTodos() async {
-    selectTypeTodos(0);
+    if (getTodosStView == StatusViews.loading) return;
 
     //! initial type (ALL TASKS) => 0
+    selectTypeTodos(0);
+
     await getTodosFromLocal();
 
     getTodosStView = StatusViews.loading;
@@ -220,11 +233,8 @@ class HomeProviderImp extends HomeProvider {
 
   //* Go to the next page
   void nextPage() async {
-    if (todosModel == null) {
-      // await getTodos();
-      return;
-    }
-    if (skip + limit < todosModel!.total) {
+    if (StatusViews.succuss == getTodosStView &&
+        skip + limit < todosModel!.total) {
       skip = skip + limit;
       currentPage++;
       await getTodos();
@@ -242,16 +252,16 @@ class HomeProviderImp extends HomeProvider {
   //* Determine the type of todo
   void selectTypeTodos(int activeIndex) {
     activeType = activeIndex;
-
     if (activeType == 0) {
-      todoItems =
-          _todoServerItems.isNotEmpty ? _todoServerItems : _todoLocalItems;
+      todoItems = getTodosStView == StatusViews.succuss
+          ? _todoServerItems
+          : _todoLocalItems;
     } else if (activeType == 1) {
-      todoItems = _todoServerItems.isNotEmpty
+      todoItems = getTodosStView == StatusViews.succuss
           ? _todoServerItems.where((todo) => todo.completed == 0).toList()
           : _todoLocalItems.where((todo) => todo.completed == 0).toList();
     } else if (activeType == 2) {
-      todoItems = _todoServerItems.isNotEmpty
+      todoItems = getTodosStView == StatusViews.succuss
           ? _todoServerItems.where((todo) => todo.completed == 1).toList()
           : _todoLocalItems.where((todo) => todo.completed == 1).toList();
     }
@@ -259,7 +269,8 @@ class HomeProviderImp extends HomeProvider {
   }
 
   //* Log out of the application for a default state
-  void logOut() async {
+  @override
+  Future logOut() async {
     await SharedPref.remove(AppKey.userId);
 
     scaffoldKey.currentContext!.router.replace(const LoginView());
