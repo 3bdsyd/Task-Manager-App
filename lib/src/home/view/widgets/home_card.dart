@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/core/gen/assets.gen.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
@@ -12,7 +13,8 @@ class HomeCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Todo todo = Provider.of<HomeProviderImp>(context).todoItems[index];
+    final HomeProviderImp provider = Provider.of<HomeProviderImp>(context);
+    final Todo todo = provider.todoItems[index];
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(
@@ -42,25 +44,39 @@ class HomeCardWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 5),
-            Text(
-              todo.todo,
+            TextFormField(
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              controller: TextEditingController(text: todo.todo),
+              onChanged: (value) => provider.changeTextEditTodo(index, value),
               style: TextStyles.style14,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
             const SizedBox(height: 5),
-            Container(
-              margin: const EdgeInsets.all(5),
-              padding: const EdgeInsets.all(3),
-              height: 20,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: todo.completed
-                    ? ColorName.water
-                    : ColorName.purplePlum.withOpacity(.7),
-              ),
-              child: Text(
-                textAlign: TextAlign.start,
-                todo.completed ? 'Done' : 'In Progress',
-                style: TextStyles.style10.copyWith(color: ColorName.white),
+            GestureDetector(
+              onTap: () => provider.toggledCheckEditTodo(index),
+              child: Container(
+                margin: const EdgeInsets.all(5),
+                padding: const EdgeInsets.all(3),
+                height: 20,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: todo.completed == 1 || todo.completed == true
+                      ? ColorName.water
+                      : ColorName.purplePlum.withOpacity(.7),
+                ),
+                child: Text(
+                  textAlign: TextAlign.start,
+                  todo.completed == 1 || todo.completed == true
+                      ? 'Done'
+                      : 'In Progress',
+                  style: TextStyles.style10.copyWith(color: ColorName.white),
+                ),
               ),
             ),
           ],

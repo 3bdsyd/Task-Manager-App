@@ -9,8 +9,8 @@ class HomeTypeTodosButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int activeIndex = Provider.of<HomeProviderImp>(context).activeIndex;
-    Provider.of<HomeProviderImp>(context).activeIndex;
+    final int activeIndex = Provider.of<HomeProviderImp>(context).activeType;
+    Provider.of<HomeProviderImp>(context).activeType;
     return SliverToBoxAdapter(
       child: SizedBox(
         height: 30,

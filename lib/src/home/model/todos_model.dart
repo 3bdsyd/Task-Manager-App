@@ -40,7 +40,7 @@ String todoToJson(Todo data) => json.encode(data.toJson());
 class Todo {
   final int id;
   final String todo;
-  final bool completed;
+  final dynamic completed;
   final dynamic userId;
 
   Todo({
@@ -53,7 +53,11 @@ class Todo {
   factory Todo.fromJson(Map<String, dynamic> json) => Todo(
         id: json["id"],
         todo: json["todo"],
-        completed: json["completed"],
+        completed: json["completed"] == true
+            ? 1
+            : json["completed"] == false
+                ? 0
+                : json["completed"],
         userId: json["userId"],
       );
 

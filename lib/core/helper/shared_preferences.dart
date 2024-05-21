@@ -20,4 +20,9 @@ class SharedPref {
     var pref = await _instance;
     return pref.setString(key, value);
   }
+
+  static Future<bool> remove(String key) async {
+    var pref = await _instance;
+    return pref.remove(key);
+  }
 }

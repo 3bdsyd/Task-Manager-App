@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:todo_app/src/home/model/todos_model.dart';
 
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
@@ -33,9 +34,9 @@ class DatabaseHelper {
     await db.execute(
       '''
       CREATE TABLE tasks (
-        id INTEGER,
+        id INTEGER PRIMARY KEY,
         todo TEXT NOT NULL,
-        completed BOOLEAN NOT NULL,
+        completed INTEGER NOT NULL,
         userId INTEGER NOT NULL
       )
       ''',
@@ -44,35 +45,27 @@ class DatabaseHelper {
 
   Future<int> insertTask(Todo todo) async {
     Database db = await database;
-    return await db.insert('tasks', todo.toJson());
+    return await db.insert('tasks', todo.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Todo>> getTasks() async {
     Database db = await database;
     List<Map<String, dynamic>> taskMaps = await db.query('tasks');
-
     return List.generate(taskMaps.length, (i) {
       return Todo.fromJson(taskMaps[i]);
     });
   }
 
-  Future<int> updateTask(Todo task) async {
+  Future<int> updateTask(Todo todo) async {
     Database db = await database;
-    return await db.update(
-      'tasks',
-      task.toJson(),
-      where: 'id = ?',
-      whereArgs: [task.id],
-    );
+    return await db
+        .update('tasks', todo.toJson(), where: 'id = ?', whereArgs: [todo.id]);
   }
 
   Future<int> deleteTask(int id) async {
     Database db = await database;
-    return await db.delete(
-      'tasks',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('tasks', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> close() async {

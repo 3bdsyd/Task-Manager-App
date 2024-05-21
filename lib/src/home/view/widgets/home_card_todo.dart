@@ -11,21 +11,20 @@ class HomeCardTodoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int idTodo = Provider.of<HomeProviderImp>(context).todoItems[index].id;
+    final int idTodo =
+        Provider.of<HomeProviderImp>(context).todoItems[index].id;
     return Stack(
       children: [
         HomeCardWidget(index: index),
-         Positioned(
+        Positioned(
           bottom: 0,
           right: 3,
-          child: HomeCardEditButtonWidget(idTodo: idTodo),
+          child: HomeCardEditButtonWidget(index: index),
         ),
-         Positioned(
+        Positioned(
           bottom: 0,
-          right: 35,
-          child: HomeCardDeletedButton(
-            idTodo: idTodo,
-          ),
+          right: 40,
+          child: HomeCardDeletedButton(idTodo: idTodo),
         ),
       ],
     );

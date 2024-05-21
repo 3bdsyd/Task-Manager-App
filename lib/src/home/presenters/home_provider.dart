@@ -1,100 +1,151 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/core/helper/database.dart';
 import 'package:todo_app/core/helper/failures_handling.dart';
 import 'package:todo_app/core/helper/shared_preferences.dart';
 import 'package:todo_app/core/helper/status_view.dart';
+import 'package:todo_app/core/router/app_router.gr.dart';
 import 'package:todo_app/core/utils/constants/app_key.dart';
+import 'package:todo_app/shared/widgets/custom_dialog.dart';
+import 'package:todo_app/shared/widgets/custom_snackbar.dart';
 import 'package:todo_app/src/home/model/todo_deleted_model.dart';
 import 'package:todo_app/src/home/model/todos_model.dart';
 import 'package:todo_app/src/home/repository/home_repo.dart';
 
 abstract class HomeProvider extends ChangeNotifier {
+  //* get tasks from the server if internet is available.
+  Future getTodosFromServer();
+
+  //* get tasks from the data base if the Internet is not available.
+  Future getTodosFromLocal();
+
+  //* Determine the method through which tasks will be fetched.
   Future getTodos();
-  Future deleteTodos(int idTodo);
-  Future editTodos(int idTodo, String todo, bool completed);
+
+  //* Delete a task from the server
+  Future deleteTodo(int idTodo);
+
+  //* Add a New task in the server
   Future addNewTodo();
+
+  //* Edit a task in the server
+  Future editTodo(int idTodo);
 }
 
 class HomeProviderImp extends HomeProvider {
-  StatusViews getTodosStView = StatusViews.initial;
+  //! ----------------- Variables -----------------
 
-  StatusViews editTodoStView = StatusViews.initial;
-  StatusViews deleteTodoStView = StatusViews.initial;
-  StatusViews addTodoStView = StatusViews.initial;
-
-  GlobalKey<ScaffoldMessengerState> scaffoldKey =
+  final GlobalKey<ScaffoldMessengerState> scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
 
-  final HomeRepoImp _homeRepoImp = HomeRepoImp();
+  final TextEditingController addTodoController = TextEditingController();
 
   final String? userId = SharedPref.getString(AppKey.userId);
 
-  TodosModel? todosModel;
+  final DatabaseHelper _database = DatabaseHelper();
 
-  int activeIndex = 0;
+  final HomeRepoImp _homeRepoImp = HomeRepoImp();
 
-  int skip = 0;
-  int currentPage = 1;
-  int limit = 5;
+  StatusViews getTodosStView = StatusViews.initial;
 
   List<Todo> todoItems = [];
+  List<Todo> _todoLocalItems = [];
+  List<Todo> _todoServerItems = [];
 
-  TodoDeletedModel? todoDeletedModel;
+  TodosModel? todosModel;
 
-  void nextPage() {
-    if (getTodosStView != StatusViews.succuss ||
-        skip + limit >= todosModel!.total) {
-      return;
+  bool addTodoIsCompleted = false;
+
+  int currentPage = 1;
+
+  int activeType = 0;
+
+  int limit = 5;
+
+  int skip = 0;
+
+  //! ----------------- Functions -----------------
+
+  //* Fetch todos from the local database
+  @override
+  Future<void> getTodosFromLocal() async {
+    todoItems = _todoLocalItems = await _database.getTasks();
+  }
+
+  //* Fetch todos from the server
+  @override
+  Future<void> getTodosFromServer() async {
+    final result = await _homeRepoImp.getTodos(userId!, limit, skip);
+
+    if (result is TodosModel) {
+      todosModel = result;
+
+      todoItems = _todoServerItems = result.todos;
+
+      for (Todo todo in _todoServerItems) {
+        //! Check if the todo item is not present in the local database
+        if (!_todoLocalItems.any((element) => element.id == todo.id)) {
+          await _database.insertTask(todo);
+        }
+      }
+      getTodosStView = StatusViews.succuss;
+    } else if (result is Failures) {
+      if (_todoLocalItems.isNotEmpty) {
+        getTodosStView = StatusViews.succuss;
+      }
+
+      scaffoldKey.currentState
+          ?.showSnackBar(SnackBar(content: Text(result.errMessage)));
     }
-    skip = skip + limit;
-    currentPage++;
-    getTodos();
+
+    notifyListeners();
   }
 
-  void previousPage() {
-    if (getTodosStView != StatusViews.succuss || skip == 0) return;
-    skip = skip - limit;
+  //* Fetch todos from both local and server
+  @override
+  Future<void> getTodos() async {
+    selectTypeTodos(0);
 
-    currentPage--;
-    getTodos();
+    //! initial type (ALL TASKS) => 0
+    await getTodosFromLocal();
+
+    getTodosStView = StatusViews.loading;
+    notifyListeners();
+
+    await getTodosFromServer();
   }
 
+  //* Delete a todo by id
+  @override
+  Future<void> deleteTodo(int idTodo) async {
+    customShowDialog(scaffoldKey.currentContext!);
+
+    final result = await _homeRepoImp.deleteTodo(idTodo);
+
+    scaffoldKey.currentContext!.router.popForced();
+
+    if (result is Failures) {
+      scaffoldKey.currentState?.showSnackBar(snackBar(result.errMessage));
+    } else if (result is TodoDeletedModel) {
+      scaffoldKey.currentState
+          ?.showSnackBar(snackBar('The task was deleted successfully'));
+
+      await getTodos();
+    }
+  }
+
+  //* Toggle the task status value
   void toggledCheckAddTodo() {
     addTodoIsCompleted = !addTodoIsCompleted;
     notifyListeners();
   }
 
-  void toggledCheckEditTodo() {
-    editTodoIsCompleted = !editTodoIsCompleted;
-    notifyListeners();
-  }
-
-  void selectTypeTodos(int activeIndex) {
-    this.activeIndex = activeIndex;
-    if (activeIndex == 0) {
-      todoItems = todosModel?.todos ?? [];
-    } else if (activeIndex == 1) {
-      todoItems =
-          todosModel?.todos.where((todo) => todo.completed == false).toList() ??
-              [];
-    } else if (activeIndex == 2) {
-      todoItems =
-          todosModel?.todos.where((todo) => todo.completed == true).toList() ??
-              [];
-    }
-    notifyListeners();
-  }
-
-  final TextEditingController addTodoController = TextEditingController();
-  bool addTodoIsCompleted = false;
-
+  //* Add a new todo
   @override
   Future<void> addNewTodo() async {
     if (addTodoController.text.isEmpty) return;
 
-    // Set status to loading
-    addTodoStView = StatusViews.loading;
-    notifyListeners();
-    final currentState = scaffoldKey.currentState;
+    customShowDialog(scaffoldKey.currentContext!);
 
     final result = await _homeRepoImp.postTodo(
       addTodoController.text.trim(),
@@ -102,135 +153,115 @@ class HomeProviderImp extends HomeProvider {
       userId!,
     );
 
+    scaffoldKey.currentContext!.router.popForced();
+
     if (result is Failures) {
-      currentState!.showSnackBar(
-        SnackBar(
-          content: Text(result.errMessage),
-        ),
-      );
+      scaffoldKey.currentState?.showSnackBar(snackBar(result.errMessage));
     } else if (result is Todo) {
-      addTodoStView = StatusViews.succuss;
+      scaffoldKey.currentState
+          ?.showSnackBar(snackBar('A new task has been inserted successfully'));
+
       addTodoController.clear();
       addTodoIsCompleted = false;
-      getTodos();
-    }
 
-    addTodoStView = StatusViews.initial;
-    notifyListeners();
-    try {} catch (error) {
-      if (currentState == null) return;
-      currentState.showSnackBar(
-        const SnackBar(
-          content: Text('An error occurred'),
-        ),
-      );
+      await getTodos();
     }
   }
 
-  final TextEditingController editTodoController = TextEditingController();
-  bool editTodoIsCompleted = false;
-
-  @override
-  Future<void> editTodos(int idTodo, String todo, bool completed) async {
-    // Set status to loading
-    editTodoStView = StatusViews.loading;
+  //* edit task status
+  void toggledCheckEditTodo(int index) {
+    todoItems[index] = Todo(
+      id: todoItems[index].id,
+      todo: todoItems[index].todo,
+      completed: todoItems[index].completed == 0 ? 1 : 0,
+      userId: todoItems[index].userId,
+    );
     notifyListeners();
-    final currentState = scaffoldKey.currentState;
-    try {
-      final result = await _homeRepoImp.putTodo(
-        idTodo,
-        editTodoController.text.trim(),
-        editTodoIsCompleted,
-      );
+  }
 
-      if (result is Failures) {
-        currentState!.showSnackBar(
-          SnackBar(
-            content: Text(result.errMessage),
-          ),
-        );
-      } else if (result is TodoDeletedModel) {
-        // If get todos is successful, update the todos model
-        editTodoStView = StatusViews.succuss;
-        getTodos();
+  //* edit todo text
+  void changeTextEditTodo(int index, String todo) {
+    todoItems[index] = Todo(
+      id: todoItems[index].id,
+      todo: todo,
+      completed: todoItems[index].completed,
+      userId: todoItems[index].userId,
+    );
+  }
 
-        notifyListeners();
-      }
-    } catch (error) {
-      if (currentState == null) return;
-      currentState.showSnackBar(
-        const SnackBar(
-          content: Text('An error occurred'),
-        ),
-      );
+  //* EDIT a todo by id
+  @override
+  Future<void> editTodo(int idTodo) async {
+    customShowDialog(scaffoldKey.currentContext!);
+    final String todo = todoItems.firstWhere((todo) => todo.id == idTodo).todo;
+
+    final bool completed =
+        todoItems.firstWhere((todo) => todo.id == idTodo).completed == 0
+            ? false
+            : true;
+
+    final result = await _homeRepoImp.putTodo(
+      idTodo,
+      todo,
+      completed,
+    );
+
+    scaffoldKey.currentContext!.router.popForced();
+
+    if (result is Failures) {
+      scaffoldKey.currentState?.showSnackBar(snackBar(result.errMessage));
+    } else if (result is Todo) {
+      scaffoldKey.currentState
+          ?.showSnackBar(snackBar('The task was edited successfully'));
+
+      await getTodos();
     }
   }
 
-  @override
-  Future<void> deleteTodos(int idTodo) async {
-    // Set status to loading
-    deleteTodoStView = StatusViews.loading;
-    notifyListeners();
-
-    final currentState = scaffoldKey.currentState;
-    try {
-      final result = await _homeRepoImp.deleteTodo(idTodo);
-
-      if (result is Failures) {
-        currentState!.showSnackBar(
-          SnackBar(
-            content: Text(result.errMessage),
-          ),
-        );
-      } else if (result is TodoDeletedModel) {
-        // If get todos is successful, update the todos model
-        todoDeletedModel = result;
-        deleteTodoStView = StatusViews.succuss;
-        getTodos();
-        notifyListeners();
-      }
-    } catch (error) {
-      if (currentState == null) return;
-      currentState.showSnackBar(
-        const SnackBar(
-          content: Text('An error occurred'),
-        ),
-      );
+  //* Go to the next page
+  void nextPage() async {
+    if (todosModel == null) {
+      await getTodos();
+      return;
+    }
+    if (skip + limit < todosModel!.total) {
+      skip = skip + limit;
+      currentPage++;
+      await getTodos();
     }
   }
 
-  @override
-  Future<void> getTodos() async {
-    // Set status to loading
-    getTodosStView = StatusViews.loading;
-    notifyListeners();
-    final currentState = scaffoldKey.currentState;
-    try {
-      final result = await _homeRepoImp.getTodos(userId!, limit, skip);
+  //* Return to previous page
+  void previousPage() async {
+    if (getTodosStView != StatusViews.succuss || skip == 0) return;
+    skip = skip - limit;
+    currentPage--;
+    await getTodos();
+  }
 
-      if (result is Failures) {
-        currentState!.showSnackBar(
-          SnackBar(
-            content: Text(result.errMessage),
-          ),
-        );
-      } else if (result is TodosModel) {
-        // If get todos is successful, update the todos model
-        todosModel = result;
+  //* Determine the type of todo
+  void selectTypeTodos(int activeIndex) {
+    activeType = activeIndex;
 
-        getTodosStView = StatusViews.succuss;
-
-        selectTypeTodos(activeIndex);
-
-        notifyListeners();
-      }
-    } catch (error) {
-      if (currentState == null) return;
-      currentState.showSnackBar(
-        const SnackBar(
-          content: Text('An error occurred'),
-        ),
-      );
+    if (activeType == 0) {
+      todoItems =
+          _todoServerItems.isNotEmpty ? _todoServerItems : _todoLocalItems;
+    } else if (activeType == 1) {
+      todoItems = _todoServerItems.isNotEmpty
+          ? _todoServerItems.where((todo) => todo.completed == 0).toList()
+          : _todoLocalItems.where((todo) => todo.completed == 0).toList();
+    } else if (activeType == 2) {
+      todoItems = _todoServerItems.isNotEmpty
+          ? _todoServerItems.where((todo) => todo.completed == 1).toList()
+          : _todoLocalItems.where((todo) => todo.completed == 1).toList();
     }
+    notifyListeners();
+  }
+
+  //* Log out of the application for a default state
+  void logOut() async {
+    await SharedPref.remove(AppKey.userId);
+
+    scaffoldKey.currentContext!.router.replace(const LoginView());
   }
 }

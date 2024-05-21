@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
-import 'package:todo_app/core/helper/status_view.dart';
 import 'package:todo_app/core/styles/text_styles.dart';
 import 'package:todo_app/src/home/presenters/home_provider.dart';
 
@@ -11,7 +10,6 @@ class HomeTodoButtonAddWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeProviderImp provider = Provider.of<HomeProviderImp>(context);
-    final bool isLoading = provider.addTodoStView == StatusViews.loading;
     return InkWell(
       onTap: () => provider.addNewTodo(),
       child: Container(
@@ -21,31 +19,14 @@ class HomeTodoButtonAddWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         height: 30,
-        child: child(isLoading),
-      ),
-    );
-  }
-
-  Widget child(bool isLoading) {
-    if (isLoading) {
-      return const Align(
-        child: SizedBox(
-          height: 15,
-          width: 15,
-          child: CircularProgressIndicator(
-            color: ColorName.purplePlum,
-            backgroundColor: ColorName.babyBlue,
+        child: Text(
+          'Add',
+          style: TextStyles.style12.copyWith(
+            color: ColorName.black,
+            fontWeight: FontWeight.w700,
           ),
         ),
-      );
-    } else {
-      return Text(
-        'Add',
-        style: TextStyles.style12.copyWith(
-          color: ColorName.black,
-          fontWeight: FontWeight.w700,
-        ),
-      );
-    }
+      ),
+    );
   }
 }

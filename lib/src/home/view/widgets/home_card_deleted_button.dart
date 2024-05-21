@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todo_app/core/gen/assets.gen.dart';
 import 'package:todo_app/core/gen/colors.gen.dart';
-import 'package:todo_app/core/helper/status_view.dart';
 import 'package:todo_app/src/home/presenters/home_provider.dart';
 
 class HomeCardDeletedButton extends StatelessWidget {
@@ -13,10 +12,10 @@ class HomeCardDeletedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Provider.of<HomeProviderImp>(context, listen: false)
-          .deleteTodos(idTodo),
+          .deleteTodo(idTodo),
       child: Container(
-        width: 25,
-        height: 25,
+        width: 30,
+        height: 30,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           color: Colors.redAccent,
@@ -24,8 +23,8 @@ class HomeCardDeletedButton extends StatelessWidget {
         ),
         child: Assets.icons.delete.image(
           fit: BoxFit.scaleDown,
-          width: 15,
-          height: 15,
+          width: 20,
+          height: 20,
           color: ColorName.white,
         ),
       ),

@@ -22,7 +22,7 @@ class Crud {
       return right(responseData);
     } catch (e) {
       if (e is DioException) {
-        if (e.response!.statusCode == 400) {
+        if (e.response?.statusCode == 400) {
           Map response = jsonDecode(e.response.toString());
           return left(Failures(errMessage: response['message']));
         }
